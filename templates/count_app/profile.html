@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+</head>
+<body>
+{% extends "account/base.html" %}
+
+{% block content %}
+
+
+<!--<a href ="{% url 'upload_data' %}">Go to Upload File Section</a>-->
+<div class="row justify-content-center">
+    <div class="card col-md-6 shadow-lg">
+        <div class="container" style="margin-top: 20px;">
+            <h1>Welcome, {{ request.user.username }} !</h1>
+            <a href ="{% url 'upload_data' %}">
+                <button class="btn btn-primary btn-block" style="margin-bottom: 20px;" type="button">Go to Upload File Section</button>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+</body>
+</html>

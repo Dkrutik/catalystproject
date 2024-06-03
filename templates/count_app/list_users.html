@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Users</title>
+</head>
+<body>
+{% extends "account/base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="card col-md-12 shadow-lg">
+        <div class="container" style="margin-top: 20px;">
+            {% if users %}
+            <form id="add-form" method="post" class="form-signin" enctype="multipart/form-data" action="">
+                {% csrf_token %}
+                <h3 style="font-weight: bold;">User List:</h3>
+                <div>
+                    <button id="submit-btn" class="btn btn-primary btn-block col-md-2" style="margin-bottom: 20px;" type="submit" disabled>Add User</button>
+                </div>
+            </form>
+            <table class="table table-hover table-striped col-md-12">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                <tr>
+                    <th scope="row">1</th>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    {% if user.is_active %}<td>Active</td>{% else %}<td>Inactive</td>{% endif %}
+                    <td>
+                        <i class="icon-trash"></i>
+                        <a href="#" style="color: red;">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="font-weight: bolder; font-size: larger;">No Users in Database</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<script>
+
+</script>
+</body>
+</html>

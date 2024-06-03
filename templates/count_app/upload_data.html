@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload File</title>
+</head>
+<body>
+  {% extends "account/base.html" %}
+  {% block content %}
+  <div class="row justify-content-center">
+    <div class="card col-md-6 shadow-lg">
+      <div class="container" style="margin-top: 20px;">
+        <form id="upload-form" method="post" class="form-signin" enctype="multipart/form-data" action="">
+          {% csrf_token %}
+          <section id="form-area">
+            <div class="form-group">
+              <h3 style="font-weight: bold;">Upload Data:</h3>
+              <div class="alert alert-danger" role="alert">
+                <p id="msg_id" style="font-weight: bold; color: red; margin-bottom: 0px;">Upload (*.csv) file only</p>
+              </div>
+              <input type="file" class="form-control-file" name="csv_file" id="csv_file" accept="text/csv" required>
+            </div>
+            <div>
+              <div>
+                <button id="submit_btn_id" class="btn btn-primary btn-block col-md-12" style="margin-bottom: 20px;" type="button"
+                  onclick="fileUpload()">Submit File</button>
+              </div>
+              <div>
+                <button id="reset_btn_id" class="btn btn-secondary btn-block col-md-12" style="margin-bottom: 20px;" type="reset">Reset</button>
+              </div>
+            </div>
+          </section>
+          <section id="progress-area"></section>
+          <section id="uploaded-area"></section>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  function fileUpload() {
+    const csvFileInput = document.getElementById("csv_file");
+    const progressArea = document.getElementById("progress-area");
+    const uploadedArea = document.getElementById("uploaded-area");
+
+    const file = csvFileInput.files[0];
+    if (file) {
+      let fileName = file.name;
+      const fileSize = file.size;
+      if (fileName.length >= 12000) {
+        const splitName = fileName.split('.');
+        fileName = `${splitName[0].substring(0, 10)}... .${splitName[1]}`;
+      }
+      console.log("fileName", fileName);
+      fileSubmit(fileName, fileSize, file, progressArea, uploadedArea);
+    }
+  }
+
+  function fileSubmit(name, size, file, progressArea, uploadedArea) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', "{% url 'upload_data' %}", true);
+    const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+    xhr.setRequestHeader('X-CSRFToken', csrfToken);
+
+    xhr.upload.addEventListener("progress", ({ loaded, total }) => {
+      document.getElementById("csv_file").disabled = true;
+      document.getElementById("submit_btn_id").disabled = true;
+      document.getElementById("reset_btn_id").disabled = true;
+      document.getElementById("msg_id").innerHTML = 'Please Wait !!!';
+
+
+      const fileLoaded = Math.floor((loaded / total) * 100);
+      const fileTotal = Math.floor(total / 1000);
+      const fileSize = fileTotal < 1024 ? `${fileTotal} KB` : `${(loaded / (1024 * 1024)).toFixed(2)} MB`;
+      const progressHTML = `
+        <div class="content" style="width: 100%; margin-bottom: 20px">
+          <div class="details">
+            <span class="name"><i class="icon-spinner"></i> Uploading ${fileLoaded}% • ${name} (${size} bytes)</span>
+          </div>
+          <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: ${fileLoaded}%">${fileLoaded}%</div>
+          </div>
+        </div>`;
+      progressArea.innerHTML = progressHTML;
+      if (loaded === total) {
+        document.getElementById("csv_file").disabled = true;
+        document.getElementById("submit_btn_id").disabled = true;
+        document.getElementById("reset_btn_id").disabled = true;
+        document.getElementById("msg_id").innerHTML = '<i class="icon-warning-sign"></i> Importing Going On !!!';
+
+        progressArea.innerHTML = "";
+        uploadedArea.insertAdjacentHTML("afterbegin", "");
+      }
+    });
+
+    xhr.addEventListener("readystatechange", () => {
+      switch (xhr.readyState) {
+        case 0:
+          console.log('UNSENT: The request has been created, but not sent yet.');
+          break;
+        case 1:
+          console.log('OPENED: The open() method has been called, but the send() method has not been called yet.');
+          break;
+        case 2:
+          console.log('HEADERS_RECEIVED: The send() method has been called, and the headers and status of the response have been received.');
+          break;
+        case 3:
+          console.log('LOADING: The response body is being received.');
+          break;
+        case 4:
+          if (xhr.status === 200) {
+            document.getElementById("csv_file").disabled = false;
+            document.getElementById("submit_btn_id").disabled = false;
+            document.getElementById("reset_btn_id").disabled = false;
+            document.getElementById("msg_id").innerHTML = '';
+            progressArea.innerHTML = "";
+            const uploadedHTML = `
+              <h3><i class="icon-check-sign"></i> File Uploaded Successfully!!!</h3>
+              <span>File Name : ${name} (${size} bytes)</span>
+              <a href="{% url 'upload_data' %}">
+                <button class="btn btn-success btn-block" style="margin-bottom: 20px; margin-top: 20px;" type="button">
+                  <i class="icon-refresh"></i> Upload File Again
+                </button>
+              </a>
+              <a href="{% url 'query_builder' %}">
+                <button class="btn btn-primary btn-block" style="margin-bottom: 20px;" type="button">
+                  Go to Query Builder Section
+                </button>
+              </a>`;
+            uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
+            document.getElementById("form-area").style.display = 'none';
+          } else {
+            progressArea.innerHTML = `<div class="error">Error: File upload failed (${xhr.status} ${xhr.statusText})</div>`;
+            document.getElementById("csv_file").disabled = false;
+            document.getElementById("submit_btn_id").disabled = false;
+            document.getElementById("reset_btn_id").disabled = false;
+            document.getElementById("msg_id").innerHTML = '<i class="icon-warning-sign"></i> Error: File upload failed';
+          }
+          break;
+        default:
+          console.log('Unknown readyState:', xhr.readyState);
+      }
+    });
+
+    xhr.onerror = () => {
+      document.getElementById("csv_file").disabled = false;
+      document.getElementById("submit_btn_id").disabled = false;
+      document.getElementById("reset_btn_id").disabled = false;
+      document.getElementById("msg_id").innerHTML = '<i class="icon-warning-sign"></i> Error: File upload failed';
+      progressArea.innerHTML = '<div class="error">Error: File upload failed (404 Not Found)</div>';
+    };
+
+    const formData = new FormData();
+    formData.append('csv_file', file);
+    xhr.send(formData);
+  }
+  </script>
+  {% endblock %}
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload</title>
+</head>
+<body>
+{% extends "account/base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="card col-md-12 shadow-lg">
+        <div class="container" style="margin-top: 20px;">
+            {% if message %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+            {% endif %}
+            {% if count %}
+            <div class="alert alert-success" role="alert">
+                Total Records Count : <span class="badge badge-secondary">{{ count }}</span><br>
+                <ul>
+                    {% if keyword %}<li>Keyword : {{ keyword }}</li>{% endif %}
+                    {% if year %}<li>Year Founded : {{ year }}</li>{% endif %}
+                    {% if industry %}<li>Industry : {{ industry }}</li>{% endif %}
+                    {% if city %}<li>City : {{ city }}</li>{% endif %}
+                    {% if state %}<li>State : {{ state }}</li>{% endif %}
+                    {% if country %}<li>Country : {{ country }}</li>{% endif %}
+                    {% if employee_from %}<li>Total employees greater than : {{ employee_from }}</li>{% endif %}
+                    {% if employee_to %}<li>Total employees less than : {{ employee_to }}</li>{% endif %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <h3 style="font-weight: bold;">Query Builder :</h3>
+            <form id="upload-form" method="post" class="form-signin" enctype="multipart/form-data" action="{% url 'query_builder' %}">
+                {% csrf_token %}
+                <div class="row form-group">
+                    <div class="col-md-3">
+                        <input type="text" name="keyword" class="form-control form-control-sm" id="" placeholder="Keyword">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="industry" class="custom-select custom-select-sm">
+                            <option value="">--Select Industry--</option>
+                            {% for industry in unique_industry %}
+                                <option value="{{ industry }}">{{ industry }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="year" class="custom-select custom-select-sm">
+                            <option value="">--Select Year Founded--</option>
+                            {% for year in unique_year %}
+                                <option value="{{ year }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="city" class="custom-select custom-select-sm">
+                            <option value="">--Select City--</option>
+                            {% for city in unique_city %}
+                                <option value="{{ city }}">{{ city }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-3">
+                        <select name="state" class="custom-select custom-select-sm">
+                            <option value="">--Select State--</option>
+                            {% for state in unique_state %}
+                                <option value="{{ state }}">{{ state }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="country" class="custom-select custom-select-sm">
+                            <option value="">--Select Country--</option>
+                            {% for country in unique_country %}
+                                <option value="{{ country }}">{{ country }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="employee_from" class="custom-select custom-select-sm">
+                            <option value="">--Select Employees (From)--</option>
+                            {% for total_employee in unique_total_employee %}
+                                <option value="{{ total_employee }}">{{ total_employee }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="employee_to" class="custom-select custom-select-sm">
+                            <option value="">--Select Employees (To)--</option>
+                            {% for total_employee in unique_total_employee %}
+                                <option value="{{ total_employee }}">{{ total_employee }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="row form-group">
+                    <div class="col-md-3">
+                       <button id="submit-btn" class="btn btn-primary btn-block" style="margin-bottom: 20px;" type="submit" {% if message %}disabled{% endif %}>
+                           Submit Query
+                       </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button id="reset-btn" class="btn btn-secondary btn-block" style="margin-bottom: 20px;" type="reset" {% if message %}disabled{% endif %}>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+<script>
+
+</script>
+</body>
+</html>
